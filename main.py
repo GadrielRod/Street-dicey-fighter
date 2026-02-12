@@ -1,6 +1,6 @@
 import utils
 import engine
-from characters import Ryu, Ken, ChunLi, Guile, Zangief
+from characters import Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega
 
 def main():
     while True:
@@ -16,7 +16,7 @@ def main():
             utils.show_rules()
             
         elif option == '4':
-            roster = [Ryu, Ken, ChunLi, Guile, Zangief]
+            roster = [Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega]
             utils.show_characters_info(roster)
             
         elif option == '5':
