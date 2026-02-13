@@ -25,7 +25,7 @@ O modo torneio agora também conta com duas dificuldades sendo elas normal e dif
 
 ---------------
 
-#Street Dicey Fighter
+# Street Dicey Fighter
 
 Street Dicey Fighter is a terminal-based game that blends the strategy of Rock–Paper–Scissors (ROCK, PAPER, SCISSORS) with dice management and unique character combos inspired by fighters such as Ryu and Ken.
 It is developed in Python, using Object-Oriented Programming, modular design, and a terminal-based interface.
@@ -36,7 +36,7 @@ https://onlinegdb.com/498j29mPc
 
 
 
-#Update 3.0
+# Update 3.0
 
 Files updated: main.py, characters.py, engine.py
 
@@ -50,7 +50,7 @@ main.py: Updated to call the new character classes in the menu and character inf
 
 ---
 
-#Latest Update 4.0
+# Latest Update 4.0
 
 Files updated: main.py, utils.py, engine.py, and characters.py
 
