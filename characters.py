@@ -250,5 +250,134 @@ class Vega(Character):
         else:
             return 0, "Falhou (Não há dados de valor [1] no Especial)"
 
-        
+#Notas da atualização 4.0 com adição dos novos personagens E. Honda Dhalsim, Bosses adicionados Akuma e M. Bison
 
+# --- E. HONDA ---
+class EHonda(Character):
+    def __init__(self):
+        super().__init__("E. Honda", hp=15, speed=0.5, max_special=5)
+        self.combo_desc = "[⚂ 3][⚃ 4]->2 dano | [⚁ 2][⚂ 5][⚄ 5]->4 dano | [⚁ 2][⚁ 2][⚃ 4]->5 dano"
+        self.special_desc = "HUNDRED HAND SLAP: Descarte TUDO. Se a soma >= 21, causa 6 de Dano."
+        self.description = self.combo_desc
+
+    def get_best_combo(self, dice_values):
+        counts = {x: dice_values.count(x) for x in range(1, 7)}
+        if counts.get(2,0)>=2 and counts.get(4,0)>=1: return 5, [2, 2, 4]
+        if counts.get(2,0)>=1 and counts.get(5,0)>=2: return 4, [2, 5, 5]
+        if counts.get(3,0)>=1 and counts.get(4,0)>=1: return 2, [3, 4]
+        return 0, []
+
+    def perform_special(self, opponent=None):
+        if not self.special_pool: return 0, "Especial vazio."
+        
+        total_sum = sum(self.special_pool)
+        dice_count = len(self.special_pool)
+        self.special_pool = [] # Descarte total
+        
+        if total_sum >= 21:
+            return 6, f"Hundred Hand Slap (Soma {total_sum}) -> DOSUKOI! (6 Dano)"
+        else:
+            return 0, f"Falhou (Soma {total_sum} < 21)"
+
+# --- DHALSIM ---
+class Dhalsim(Character):
+    def __init__(self):
+        super().__init__("Dhalsim", hp=10, speed=1.5, max_special=4)
+        self.combo_desc = "[⚁ 2]->1 dano | [⚀ 1][⚃ 4]->2 dano | [⚄ 5][⚅ 6]->2 dano"
+        self.special_desc = "YOGA ARTS: Descarte TUDO. Pares causam 1 Dano. Ímpares curam 1 Vida."
+        self.description = self.combo_desc
+
+    def get_best_combo(self, dice_values):
+        counts = {x: dice_values.count(x) for x in range(1, 7)}
+        if counts.get(1,0)>=1 and counts.get(4,0)>=1: return 2, [1, 4]
+        if counts.get(5,0)>=1 and counts.get(6,0)>=1: return 2, [5, 6]
+        if counts.get(2,0)>=1: return 1, [2]
+        return 0, []
+
+    def perform_special(self, opponent=None):
+        if not self.special_pool: return 0, "Sem Yoga Fire."
+        
+        dmg = 0
+        heal = 0
+        
+        for d in self.special_pool:
+            if d % 2 == 0: # Par
+                dmg += 1
+            else: # Ímpar
+                heal += 1
+        
+        self.heal(heal)
+        self.special_pool = [] # Descarte total
+        
+        return dmg, f"YOGA! {dmg} Dano (Pares) e {heal} Cura (Ímpares)"
+
+# --- M. BISON (BOSS) ---
+class MBison(Character):
+    def __init__(self):
+        super().__init__("M. Bison", hp=15, speed=6.0, max_special=5)
+        self.combo_desc = "[⚂ 3]->2 dano | [⚁ 2][⚁ 2]->3 dano | [⚀ 1][⚁ 2][⚂ 3]->5 dano"
+        self.special_desc = "PSYCHO CRUSHER: Descarta TUDO. Para cada dado [3] ou menor, causa 1 de dano."
+        self.description = self.combo_desc
+
+    def get_best_combo(self, dice_values):
+        counts = {x: dice_values.count(x) for x in range(1, 7)}
+        if counts.get(1,0)>=1 and counts.get(2,0)>=1 and counts.get(3,0)>=1: return 5, [1, 2, 3]
+        if counts.get(2, 0) >= 2: return 3, [2, 2]
+        if counts.get(3, 0) >= 1: return 2, [3]
+        return 0, []
+
+    def perform_special(self, opponent=None):
+        if not self.special_pool: return 0, "Sem Psycho Power."
+        
+        dmg = 0
+        used_dice = list(self.special_pool) # Cópia para log
+        
+        # Lógica: Descarte todos, 3 ou menos causa dano
+        for d in self.special_pool:
+            if d <= 3:
+                dmg += 1
+        
+        self.special_pool = [] # Limpa tudo
+        return dmg, f"Psycho Crusher {used_dice} -> {dmg} Hits!"
+
+# --- AKUMA (BOSS) ---
+class Akuma(Character):
+    def __init__(self):
+        super().__init__("Akuma", hp=12, speed=5.5, max_special=6)
+        self.combo_desc = "[⚁ 2][⚃ 4]->2 dano | [⚂ 3][⚂ 3]->2 dano | [⚀ 1][⚁ 2][⚂ 3]->4 dano"
+        self.special_desc = "SHUN GOKU SATSU (3x[6]): +1 Dano Permanente | ONIGIRI (6x[1]): Cura Total."
+        self.description = self.combo_desc
+        self.bonus_damage = 0 # Atributo exclusivo do Akuma
+
+    def get_best_combo(self, dice_values):
+        counts = {x: dice_values.count(x) for x in range(1, 7)}
+        base_dmg = 0
+        used = []
+        
+        if counts.get(1,0)>=1 and counts.get(2,0)>=1 and counts.get(3,0)>=1: 
+            base_dmg, used = 4, [1, 2, 3]
+        elif counts.get(2, 0) >= 1 and counts.get(4, 0) >= 1: 
+            base_dmg, used = 2, [2, 4]
+        elif counts.get(3, 0) >= 2: 
+            base_dmg, used = 2, [3, 3]
+        
+        if base_dmg > 0:
+            return base_dmg + self.bonus_damage, used
+        return 0, []
+
+    def perform_special(self, opponent=None):
+        # Prioridade 1: ONIGIRI (Se tiver seis 1s e vida baixa)
+        ones = self.special_pool.count(1)
+        if ones >= 6:
+            for _ in range(6): self.special_pool.remove(1)
+            self.heal(100) # Cura total
+            return 0, "ONIGIRI! A alma está purificada (Vida Cheia)!"
+
+        # Prioridade 2: SHUN GOKU SATSU (Se tiver três 6s)
+        sixes = self.special_pool.count(6)
+        if sixes >= 3:
+            for _ in range(3): self.special_pool.remove(6)
+            self.bonus_damage += 1
+            return 0, "SHUN GOKU SATSU! A morte se aproxima (+1 Dano Permanente)!"
+            
+        return 0, "Falhou (Precisa de 3x[6] ou 6x[1])"
